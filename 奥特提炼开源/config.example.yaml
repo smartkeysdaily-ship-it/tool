@@ -1,0 +1,33 @@
+# Copy to config.yaml and set your real token.
+# config.yaml is gitignored — never commit secrets.
+
+rust_bot_base_url: https://upiapi.linhtd.com
+rust_bot_token: upi_changeme
+telegram_bot_token: ''
+telegram_chat_id: ''
+telegram_enabled: false
+telegram_mode: qr_only
+concurrency_limit: 5
+poll_interval_seconds: 120
+poll_budget: 3
+hard_timeout_seconds: 300
+pipeline_retry_limit: 5
+login_backoff_seconds:
+  - 2
+  - 5
+  - 15
+skip_session_cache: false
+flow_mode: auto
+blocklist_enabled: true
+blocklist_auto_threshold: 5
+session_cache_ttl_buffer_seconds: 300
+stale_threshold_seconds: 300
+# 代理池：每行一个，可无限填写。失败重试时自动取用一条"未使用过"的 IP。
+# 格式支持 host:port:user:pass 或 http(s)://user:pass@host:port 或 socks5://host:port
+proxy_list: ''
+proxy_enabled: true
+# 扫码站点：提取成功后自动把支付链接提交到站点（需要填 CDK 并启用）
+scan_site_url: https://masi.cc.cd
+scan_site_cdk: ''
+scan_site_enabled: false
+scan_site_require_workers: true

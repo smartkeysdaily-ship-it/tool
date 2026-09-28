@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang='zh-CN'>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UPI 奥特提炼 公益版 一条龙</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%233d5aef'/%3E%3Cg fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round'%3E%3Crect x='7' y='7' width='7' height='7' rx='1.5'/%3E%3Crect x='18' y='7' width='7' height='7' rx='1.5'/%3E%3Crect x='7' y='18' width='7' height='7' rx='1.5'/%3E%3Cpath d='M18 18h3v3h-3zM25 18v3M18 25h3M25 25v.01'/%3E%3C/g%3E%3C/svg%3E"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"IBM Plex Sans"', 'system-ui', 'sans-serif'],
+            mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace'],
+          },
+          colors: {
+            ink: { 50:'#f6f7f9', 100:'#eceef2', 200:'#d5dae3', 300:'#b0b8c9', 400:'#8590a8', 500:'#66728c', 600:'#515b73', 700:'#434b5e', 800:'#3a4150', 900:'#1c1f28', 950:'#111318' },
+            accent: { DEFAULT:'#3d5aef', soft:'#eef1ff', hover:'#2f48d4' },
+          },
+          boxShadow: {
+            panel: '0 0 0 1px rgba(28,31,40,.06), 0 1px 2px rgba(28,31,40,.04)',
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <style>
+    :root{
+      --bg:#faf7f2;            /* 米白 */
+      --card:#ffffff;
+      --card2:#fbfaf8;
+      --line:#eae5dd;
+      --line2:#ddd6cb;
+      --text:#2b2b33;
+      --muted:#6b7280;
+      --dim:#9aa2ad;
+      --accent:#3b82f6;        /* 浅蓝 */
+      --accent-2:#2563eb;
+      --accent-soft:#eff6ff;
+      --accent-line:#bfdbfe;
+      --ok:#16a34a; --ok-soft:#f0fdf4;
+      --bad:#dc2626; --bad-soft:#fef2f2;
+      --warn:#d97706; --warn-soft:#fffbeb;
+      --pp:#6366f1; --pp-soft:#eef2ff;
+      --shadow:0 1px 2px rgba(43,43,51,.04),0 1px 3px rgba(43,43,51,.06);
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    [x-cloak]{display:none!important}
+    html,body{height:100%}
+    body{
+      font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI','Microsoft YaHei',sans-serif;
+      background:var(--bg);color:var(--text);font-size:13px;-webkit-font-smoothing:antialiased;
+    }
+    .mono,code,pre{font-family:'JetBrains Mono','Consolas',monospace}
+    *::-webkit-scrollbar{width:9px;height:9px}
+    *::-webkit-scrollbar-thumb{background:#d8d2c8;border-radius:99px}
+    *::-webkit-scrollbar-thumb:hover{background:#c4bcae}
+    *::-webkit-scrollbar-track{background:transparent}
+    .flex1{flex:1}
+
+    /* Toast */
+    .toast-wrap{position:fixed;right:18px;bottom:18px;z-index:80;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+    .toast{display:flex;align-items:flex-start;gap:8px;max-width:360px;padding:11px 14px;border-radius:11px;
+      background:#ffffff;border:1px solid var(--line2);box-shadow:0 10px 30px rgba(43,43,51,.13);
+      font-size:12.5px;color:var(--text);pointer-events:auto;animation:tin .22s ease}
+    .toast .ico-ok{width:15px;height:15px;flex:none;margin-top:1px;color:var(--ok)}
+    @keyframes tin{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
+
+    /* Top bar */
+    .topbar{position:sticky;top:0;z-index:40;height:56px;display:flex;align-items:center;gap:14px;padding:0 20px;
+      background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+    .brand{display:flex;align-items:center;gap:10px}
+    .brand-glyph{width:32px;height:32px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:9px;
+      background:linear-gradient(135deg,#3b82f6,#60a5fa);color:#fff;box-shadow:0 3px 10px rgba(59,130,246,.35)}
+    .brand h1{font-size:15px;font-weight:800;letter-spacing:.2px}
+    .seg{display:inline-flex;background:#f1efe9;border-radius:9px;padding:3px;gap:2px;border:1px solid var(--line)}
+    .seg button{padding:6px 14px;border:0;border-radius:7px;background:transparent;color:var(--muted);font:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
+    .seg button.on{background:linear-gradient(135deg,#3b82f6,#60a5fa);color:#fff;font-weight:700;
+      box-shadow:0 2px 8px rgba(59,130,246,.4)}
+    .status-chip{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:99px;font-size:11.5px;font-weight:600;
+      background:var(--ok-soft);color:var(--ok);border:1px solid #bbf7d0}
+    .status-chip[data-status="idle"]{background:var(--bad-soft);color:var(--bad);border-color:#fecaca}
+    .status-dot{width:7px;height:7px;border-radius:99px;background:currentColor;box-shadow:0 0 8px currentColor}
+
+    /* 公告 + 统计条 */
+    .notice-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+      padding:8px 20px;background:linear-gradient(90deg,#eff6ff,#f5f3ff);border-bottom:1px solid var(--line)}
+    .nb-group{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .nb-chip{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;color:var(--muted);
+      background:#fff;border:1px solid var(--line);padding:4px 10px;border-radius:99px}
+    .nb-chip b{font-family:'JetBrains Mono',monospace;color:var(--text);font-weight:800}
+    .nb-chip.qq b{color:var(--accent-2)}
+    .nb-chip.ok{background:var(--ok-soft);border-color:#bbf7d0;color:var(--ok)}
+    .nb-chip.ok b{color:var(--ok)}
+    .nb-chip.bad{background:var(--bad-soft);border-color:#fecaca;color:var(--bad)}
+    .nb-chip.bad b{color:var(--bad)}
+    .nb-chip.rate{background:var(--accent-soft);border-color:var(--accent-line);color:var(--accent-2)}
+    .nb-chip.rate b{color:var(--accent-2)}
+    .nb-chip.sub{background:#faf7f2}
+    .nb-chip.sub b.ok{color:var(--ok)}.nb-chip.sub b.bad{color:var(--bad)}
+
+    /* Two-column layout */
+    .layout{display:grid;grid-template-columns:minmax(360px,420px) minmax(0,1fr);gap:16px;padding:16px 20px 30px;align-items:start}
+    @media(max-width:1000px){.layout{grid-template-columns:1fr}}
+    .col{display:flex;flex-direction:column;gap:14px;min-width:0}
+
+    /* Card */
+    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+    .card-header{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 15px;border-bottom:1px solid var(--line);background:var(--card2)}
+    .card-header h3{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;letter-spacing:.2px}
+    .cfg-ico{width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;border-radius:7px;font-size:11px;
+      background:var(--accent-soft);color:var(--accent-2);font-weight:800}
+    .badge{margin-left:auto;font-size:11px;font-weight:600;color:var(--muted);background:#f6f4ef;
+      border:1px solid var(--line);padding:3px 9px;border-radius:99px;font-family:'JetBrains Mono',monospace}
+    .head-tools{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-left:auto}
+
+    /* inputs */
+    .input{width:100%;padding:9px 11px;border-radius:9px;border:1px solid var(--line2);background:#fff;
+      color:var(--text);font:inherit;font-size:12.5px;transition:border-color .15s,box-shadow .15s}
+    .input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,.16)}
+    .input::placeholder{color:var(--dim)}
+    .input-sm{padding:7px 10px;font-size:12px}
+    .input-mini{width:58px;padding:5px 8px;font-size:12px}
+    .textarea{resize:vertical;line-height:1.55}
+    .at-textarea{min-height:130px;font-family:'JetBrains Mono',monospace;font-size:12px;margin:12px 15px 0;width:calc(100% - 30px)}
+    .proxy-textarea{min-height:76px;font-family:'JetBrains Mono',monospace;font-size:11.5px;margin:0 15px;width:calc(100% - 30px)}
+    .mono{font-family:'JetBrains Mono',monospace}
+    .search{width:150px}
+
+    /* buttons */
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 15px;border:1px solid transparent;border-radius:10px;
+      font:inherit;font-size:12.5px;font-weight:600;line-height:1;cursor:pointer;white-space:nowrap;transition:all .15s;user-select:none;flex:none;min-height:36px;box-sizing:border-box}
+    .btn:active:not(:disabled){transform:translateY(1px)}
+    .btn:disabled{opacity:.45;cursor:not-allowed}
+    .btn-primary{background:linear-gradient(135deg,#3b82f6,#60a5fa);color:#fff;box-shadow:0 3px 12px rgba(59,130,246,.35)}
+    .btn-primary:hover:not(:disabled){box-shadow:0 5px 16px rgba(59,130,246,.45)}
+    .btn-ghost{background:var(--accent-soft);color:var(--accent-2);border-color:var(--accent-line)}
+    .btn-ghost:hover:not(:disabled){background:#dbeafe}
+    .btn-danger{background:var(--bad-soft);color:var(--bad);border-color:#fecaca}
+    .btn-danger:hover:not(:disabled){background:#fee2e2}
+    .btn-lg{padding:11px 18px;font-size:13px}
+    .btn-block{width:100%}
+    .btn-mini{padding:6px 11px;border-radius:8px;border:1px solid var(--line2);background:#fff;
+      color:var(--muted);font:inherit;font-size:11.5px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap;text-decoration:none;
+      display:inline-flex;align-items:center;justify-content:center;gap:5px;flex:none;line-height:1.2;min-height:28px;box-sizing:border-box}
+    .btn-mini:hover:not(:disabled){background:var(--accent-soft);color:var(--accent-2);border-color:var(--accent-line)}
+    .btn-mini:disabled{opacity:.45;cursor:not-allowed}
+    .btn-mini.blue{color:var(--accent-2);border-color:var(--accent-line);background:var(--accent-soft)}
+    .btn-mini.danger{color:var(--bad);border-color:#fecaca}
+    .btn-mini.danger:hover{background:var(--bad-soft)}
+    .action-row{display:flex;gap:10px;padding:14px 15px 6px}
+    .action-row .btn{flex:1}
+    .row-tools{display:flex;align-items:center;gap:10px}
+    .row-tools.between{justify-content:space-between}
+    .row-tools.wrap{flex-wrap:wrap;gap:14px 18px}
+    .inline-field{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);font-weight:600;white-space:nowrap}
+
+    /* toggle —— 统一设计：文字 开关（文字左、开关右，灰色轨道） */
+    .tgl{position:relative;display:inline-flex;align-items:center;flex-direction:row-reverse;gap:9px;
+      padding:6px 0;cursor:pointer;font-size:12.5px;color:var(--muted);transition:color .15s;
+      white-space:nowrap;user-select:none;line-height:1}
+    .tgl.sm{padding:0;gap:8px}
+    .tgl.inline{padding:0}
+    .tgl input{position:absolute;opacity:0;width:0;height:0;margin:0;padding:0;border:0;pointer-events:none}
+    .tgl-text{white-space:nowrap;line-height:1.2;font-weight:600;flex:0 0 auto}
+    .tgl-track{width:38px;height:21px;flex:0 0 38px;border-radius:99px;background:#cfc7bb;
+      border:1px solid #bdb4a6;position:relative;transition:background .18s,border-color .18s;box-sizing:border-box}
+    .tgl-thumb{position:absolute;top:50%;left:2px;transform:translateY(-50%);width:15px;height:15px;border-radius:99px;
+      background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:left .18s}
+    .tgl:hover .tgl-track{box-shadow:0 0 0 3px rgba(59,130,246,.13)}
+    .tgl input:checked ~ .tgl-track{background:linear-gradient(135deg,#3b82f6,#60a5fa);border-color:#2563eb}
+    .tgl input:checked ~ .tgl-track .tgl-thumb{left:19px}
+    .tgl input:checked ~ .tgl-text{color:var(--accent-2);font-weight:700}
+
+    /* hint lines */
+    .hline{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 15px;font-size:11.5px;color:var(--dim)}
+    .hline > span{min-width:0}
+    .toolbar-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 15px}
+    .toolbar-row .tgl{padding:0}
+    .hint{padding:0 15px 12px;font-size:11.5px;color:var(--muted)}
+    .dim{color:var(--dim)}
+    .proxy-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 15px 6px;margin-top:4px;border-top:1px dashed var(--line2)}
+    .proxy-title{font-size:11.5px;font-weight:700;color:var(--accent-2);letter-spacing:.04em}
+    .proxy-stat{display:flex;align-items:center;gap:14px;font-size:11.5px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+    .proxy-stat.mini{gap:10px;font-size:11px}
+    .proxy-stat b{color:var(--text);font-weight:700}
+    .proxy-stat b.ok{color:var(--ok)}.proxy-stat b.bad{color:var(--bad)}
+
+    /* stats strip */
+    .stats-row{display:flex;gap:10px;padding:14px 15px 0}
+    .stat-box{flex:1;padding:10px 12px;border-radius:10px;background:var(--card2);border:1px solid var(--line)}
+    .stat-box label{display:block;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin-bottom:4px}
+    .stat-box b{font-size:18px;font-weight:800;font-family:'JetBrains Mono',monospace}
+    .stat-box b.blue{color:var(--accent-2)}.stat-box b.ok{color:var(--ok)}.stat-box b.pp{color:var(--pp)}.stat-box b.bad{color:var(--bad)}
+
+    /* filter tabs */
+    .filter-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:10px 15px;border-bottom:1px solid var(--line);background:var(--card2)}
+    .ftab{padding:6px 12px;border-radius:8px;border:1px solid transparent;background:transparent;color:var(--muted);font:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
+    .ftab:hover{background:var(--accent-soft);color:var(--accent-2)}
+    .ftab.on{background:#fff;color:var(--accent-2);border-color:var(--accent-line);box-shadow:0 1px 2px rgba(43,43,51,.06)}
+    .ftab .fc{font-family:'JetBrains Mono',monospace;font-size:10.5px;opacity:.7;margin-left:4px}
+
+    /* jobs table */
+    .jobs-wrap{overflow:auto;max-height:420px}
+    table.jobs{width:100%;border-collapse:separate;border-spacing:0}
+    table.jobs th{position:sticky;top:0;z-index:1;padding:10px 12px;text-align:left;font-size:10.5px;font-weight:700;letter-spacing:.05em;
+      text-transform:uppercase;color:var(--dim);background:var(--card2);border-bottom:1px solid var(--line)}
+    table.jobs td{padding:10px 12px;border-bottom:1px solid #f3f0eb;font-size:12.5px;vertical-align:middle}
+    table.jobs tbody tr{cursor:pointer;transition:background .12s}
+    table.jobs tbody tr:hover{background:#f8fafc}
+    table.jobs tbody tr.sel{background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent)}
+    .ta-r{text-align:right}.ta-c{text-align:center}
+    .jemail{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text);max-width:min(280px,26vw);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .jerr{margin-top:3px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--bad);max-width:min(280px,26vw);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .rowacts{display:flex;justify-content:flex-end;gap:5px;flex-wrap:nowrap}
+    .empty-td{padding:40px 0!important;text-align:center}
+    .empty-state .big{font-size:26px;color:#cbd5e1;margin-bottom:8px}
+
+    /* state chips */
+    .state-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600;white-space:nowrap}
+    .state-chip::before{content:'';width:5px;height:5px;border-radius:99px;background:currentColor;opacity:.85}
+    .bg-emerald-100{background:var(--ok-soft)!important;color:var(--ok)!important}
+    .bg-amber-100{background:var(--warn-soft)!important;color:var(--warn)!important}
+    .bg-rose-100{background:var(--bad-soft)!important;color:var(--bad)!important}
+    .bg-violet-100{background:#f5f3ff!important;color:#7c3aed!important}
+    .bg-ink-200{background:#f3f4f6!important;color:var(--muted)!important}
+    .bg-indigo-100{background:var(--pp-soft)!important;color:var(--pp)!important}
+    .bg-sky-100{background:var(--accent-soft)!important;color:var(--accent-2)!important}
+
+    /* job log */
+    .log-sub{padding:9px 15px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--dim);border-bottom:1px solid var(--line)}
+    .log-body{overflow-y:auto;padding:14px 15px;max-height:300px}
+    .timeline{list-style:none;position:relative;padding-left:18px;display:flex;flex-direction:column;gap:14px}
+    .timeline::before{content:'';position:absolute;left:5px;top:4px;bottom:4px;width:2px;background:var(--line2)}
+    .timeline li{position:relative}
+    .timeline .dot{position:absolute;left:-17px;top:3px;width:11px;height:11px;border-radius:99px;box-shadow:0 0 0 3px #fff}
+    .bg-emerald-500{background:var(--ok)}.bg-rose-500{background:var(--bad)}.bg-rose-400{background:#f87171}
+    .bg-amber-500{background:var(--warn)}.bg-violet-500{background:#8b5cf6}.bg-ink-400{background:var(--dim)}
+    .bg-ink-300{background:#cbd5e1}.bg-indigo-500{background:var(--pp)}.bg-sky-500{background:var(--accent)}
+    .tl-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+    .tl-state{font-size:12px;font-weight:600;color:var(--text)}
+    .tl-time{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--dim)}
+    .tl-note{margin-top:3px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);word-break:break-all}
+    .err-box{margin-top:14px;padding:10px 12px;border-radius:10px;background:var(--bad-soft);border:1px solid #fecaca}
+    .err-box label,.plan-box label{display:block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+    .err-box label{color:var(--bad)}.err-box div{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:#b91c1c;word-break:break-all}
+    .plan-box{margin-top:10px;padding:10px 12px;border-radius:10px;background:var(--pp-soft);border:1px solid #c7d2fe}
+    .plan-box label{color:var(--pp)}.plan-box div{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:#4338ca}
+    .attempts{display:flex;gap:14px;margin-top:14px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--dim)}
+    .log-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--dim);padding:34px 0}
+    .log-empty .big{font-size:24px;color:#cbd5e1}
+
+    /* settings inline */
+    .cfg-block{padding:14px 15px;border-top:1px solid var(--line)}
+    .cfg-block:first-child{border-top:0}
+    .cfg-block h4{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-2);margin-bottom:11px}
+    .pf{display:flex;flex-direction:column;gap:5px;margin-bottom:11px}
+    .pf:last-child{margin-bottom:0}
+    .pf label{font-size:11px;font-weight:600;color:var(--muted)}
+    .pw{position:relative}
+    .pw .input{padding-right:64px}
+    .pw-tgl{position:absolute;right:6px;top:50%;transform:translateY(-50%);padding:4px 8px;border:0;border-radius:6px;
+      background:#f1efe9;color:var(--muted);font:inherit;font-size:11px;cursor:pointer}
+    .pw-tgl:hover{background:var(--accent-soft);color:var(--accent-2)}
+    .pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    @media(max-width:520px){.pgrid{grid-template-columns:1fr 1fr}}
+    .tmsg{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--dim)}
+    .tmsg.ok{color:var(--ok)}.tmsg.bad{color:var(--bad)}
+
+    /* inline confirm */
+    .confirm-bar{display:flex;align-items:center;gap:10px;padding:12px 15px;background:var(--warn-soft);border-top:1px solid #fde68a;font-size:12px}
+    .confirm-bar .ctxt{flex:1;min-width:0}
+    .confirm-bar .ctxt b{display:block;font-size:12.5px;color:#92400e;margin-bottom:2px}
+    .confirm-bar .ctxt span{color:var(--muted);font-size:11.5px}
+
+    /* QR inline */
+    .qr-inline{padding:15px;border-top:1px solid var(--line);text-align:center;background:var(--card2)}
+    .qr-inline img{max-width:220px;width:100%;border-radius:10px;border:1px solid var(--line2);background:#fff}
+    .qr-inline .qr-meta{font-size:12px;color:var(--muted);margin-bottom:10px}
+    .qr-inline .qr-email{font-weight:700;color:var(--text);word-break:break-all}
+
+    /* results */
+    .result-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    @media(max-width:700px){.result-grid{grid-template-columns:1fr}}
+    .hl-ok{border-bottom-color:#bbf7d0;background:linear-gradient(90deg,var(--ok-soft),transparent)}
+    .hl-pp{border-bottom-color:#c7d2fe;background:linear-gradient(90deg,var(--pp-soft),transparent)}
+    .dot-live{width:8px;height:8px;border-radius:99px}
+    .dot-live.ok{background:var(--ok)}.dot-live.pp{background:var(--pp)}
+    .result-pre{overflow:auto;padding:12px 15px;font-family:'JetBrains Mono',monospace;font-size:11px;
+      line-height:1.6;color:var(--muted);white-space:pre-wrap;word-break:break-all;max-height:180px;min-height:60px}
+  </style>
+</head>
+<body x-data="app()" x-init="init()" x-cloak>
+  <!-- Toast -->
+  <div class="toast-wrap">
+    <template x-for="t in toasts" :key="t.id">
+      <div class="toast">
+        <svg class="ico-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        <span x-text="t.msg"></span>
+      </div>
+    </template>
+  </div>
+
+  <!-- 顶栏 -->
+  <!-- 公告 + 统计条 -->
+  <div class="notice-bar">
+    <div class="nb-group">
+      <span class="nb-chip qq">QQ群 <b>1042096408</b></span>
+      <span class="nb-chip qq">作者QQ <b>924431704</b></span>
+    </div>
+    <div class="nb-group stats">
+      <span class="nb-chip ok">成功 <b x-text="stats2.done_total"></b></span>
+      <span class="nb-chip bad">失败 <b x-text="stats2.fail_total"></b></span>
+      <span class="nb-chip rate">成功率 <b x-text="stats2.success_rate + '%'"></b></span>
+      <span class="nb-chip sub">24h 成功 <b class="ok" x-text="stats2.done_24h"></b> / 失败 <b class="bad" x-text="stats2.fail_24h"></b></span>
+    </div>
+  </div>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-glyph" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v3M14 20h3M20 20v.01"/></svg>
+      </span>
+      <h1>UPI 奥特提炼 公益版 一条龙</h1>
+    </div>
+    <div class="seg">
+      <button type="button" :class="(config.flow_mode||'auto')==='auto' && 'on'" @click="setFlow('auto')">Auto · 自动排队</button>
+      <button type="button" :class="config.flow_mode==='manual' && 'on'" @click="setFlow('manual')">Manual · 手动</button>
+    </div>
+    <div class="flex1"></div>
+    <div class="status-chip" :data-status="sseOk ? 'ok' : 'idle'">
+      <span class="status-dot"></span>
+      <span x-text="sseOk ? '实时连接' : '重连中'"></span>
+    </div>
+  </header>
+
+  <!-- 两栏布局 -->
+  <div class="layout">
+    <!-- 左栏：输入 + 设置 -->
+    <div class="col">
+      <!-- 提链配置 -->
+      <div class="card">
+        <div class="card-header">
+          <h3><span class="cfg-ico">A</span>提链配置</h3>
+          <span class="badge" x-text="preview.valid + ' 正常 · ' + preview.invalid + ' 错误'"></span>
+        </div>
+        <div class="stats-row">
+          <div class="stat-box"><label>运行中</label><b class="blue" x-text="stats.active"></b></div>
+          <div class="stat-box"><label>Done</label><b class="ok" x-text="stats.done"></b></div>
+          <div class="stat-box"><label>Plus</label><b class="pp" x-text="stats.plus"></b></div>
+          <div class="stat-box"><label>失败</label><b class="bad" x-text="stats.failed + stats.stale"></b></div>
+        </div>
+        <textarea x-model="rawText" @input="persistDraft($event.target.value)"
+                  class="input textarea mono at-textarea" spellcheck="false"
+                  placeholder="每行一个 Access Token（eyJ 开头）&#10;也可用 email|AT 指定邮箱"></textarea>
+        <div class="hline">
+          <span>一行一个 AT · 自动从 JWT 解析邮箱</span>
+          <button type="button" class="btn-mini" @click="confirmClearInput()" :disabled="!(rawText||'').trim()">清空</button>
+        </div>
+
+        <!-- 代理链 -->
+        <div class="proxy-head">
+          <span class="proxy-title">代理链 · IP 用一次即弃</span>
+          <div class="proxy-stat mini">
+            <span>总 <b x-text="proxyPool.total"></b></span>
+            <span>用 <b x-text="proxyPool.used"></b></span>
+            <span>剩 <b :class="proxyPool.remaining>0?'ok':'bad'" x-text="proxyPool.remaining"></b></span>
+          </div>
+        </div>
+        <textarea x-model="configEdit.proxy_list" @input="proxyDirty=true"
+                  class="input textarea mono proxy-textarea" spellcheck="false"
+                  placeholder="每行一个代理，可无限填写&#10;host:port:user:pass&#10;http://user:pass@host:port"></textarea>
+        <div class="toolbar-row">
+          <span class="dim" style="font-size:11.5px">代理仅保存在本机浏览器 · 填了就使用</span>
+          <button type="button" class="btn-mini blue" @click="saveProxy()" :disabled="savingProxy" x-text="savingProxy ? '保存中…' : '保存代理'"></button>
+        </div>
+
+        <!-- 扫码站点 -->
+        <div class="proxy-head">
+          <span class="proxy-title">扫码站点 · 提取成功后自动提交</span>
+          <div class="proxy-stat mini" x-show="scanQuota">
+            <span>可用 <b class="ok" x-text="scanQuota?.available_uses ?? '—'"></b></span>
+          </div>
+        </div>
+        <input class="input mono" style="margin:0 15px;width:calc(100% - 30px)" spellcheck="false"
+               x-model="configEdit.scan_site_cdk" @input="scanDirty=true"
+               placeholder="扫码站点 CDK（KSCAN-XXXX-...）"/>
+        <div class="toolbar-row">
+          <label class="tgl inline"><input type="checkbox" x-model="configEdit.scan_site_enabled" @change="scanDirty=true"/><span class="tgl-track"><span class="tgl-thumb"></span></span><span class="tgl-text">启用扫码提交</span></label>
+          <div class="row-tools" style="gap:6px">
+            <button type="button" class="btn-mini" @click="checkScanCdk()" :disabled="checkingScan" x-text="checkingScan ? '查询中…' : '查额度'"></button>
+            <button type="button" class="btn-mini blue" @click="saveScanSite()" :disabled="savingScan" x-text="savingScan ? '保存中…' : '保存'"></button>
+          </div>
+        </div>
+
+        <label class="tgl">
+          <input type="checkbox" x-model="skipCacheBatch"/>
+          <span class="tgl-track"><span class="tgl-thumb"></span></span>
+          <span class="tgl-text">本批次跳过会话缓存</span>
+        </label>
+        <div class="action-row">
+          <button type="button" class="btn btn-primary btn-lg" @click="submit('immediate')" :disabled="submitting">
+            <span x-text="submitting ? '提交中…' : '立即运行'"></span>
+          </button>
+          <button type="button" class="btn btn-ghost" @click="submit('hold')" :disabled="submitting">加入队列</button>
+        </div>
+        <p x-show="submitMsg" class="hint" x-text="submitMsg"></p>
+      </div>
+
+      <!-- 设置（内联） -->
+      <div class="card">
+        <div class="card-header">
+          <h3><span class="cfg-ico">⚙</span>设置</h3>
+          <div class="head-tools">
+            <a href="/api/logs/export" class="btn-mini">导出日志</a>
+            <button type="button" class="btn-mini" @click="loadConfig()">重置</button>
+            <button type="button" class="btn-mini blue" @click="saveConfig()">保存设置</button>
+          </div>
+        </div>
+
+        <section class="cfg-block">
+          <h4>流水线参数</h4>
+          <div class="pgrid">
+            <div class="pf"><label>并发数</label><input type="number" min="1" max="50" class="input" x-model.number="configEdit.concurrency_limit"/></div>
+            <div class="pf"><label>轮询间隔(秒)</label><input type="number" class="input" x-model.number="configEdit.poll_interval_seconds"/></div>
+            <div class="pf"><label>轮询次数</label><input type="number" class="input" x-model.number="configEdit.poll_budget"/></div>
+            <div class="pf"><label>硬超时</label><input type="number" class="input" x-model.number="configEdit.hard_timeout_seconds"/></div>
+            <div class="pf"><label>重试次数(换IP)</label><input type="number" min="0" max="50" class="input" x-model.number="configEdit.pipeline_retry_limit"/></div>
+            <div class="pf"><label>僵死阈值</label><input type="number" class="input" x-model.number="configEdit.stale_threshold_seconds"/></div>
+          </div>
+          <div class="row-tools wrap" style="margin-top:11px">
+            <label class="tgl inline"><input type="checkbox" x-model="configEdit.blocklist_enabled"/><span class="tgl-track"><span class="tgl-thumb"></span></span><span class="tgl-text">黑名单</span></label>
+            <label class="tgl inline"><input type="checkbox" x-model="configEdit.skip_session_cache"/><span class="tgl-track"><span class="tgl-thumb"></span></span><span class="tgl-text">跳过缓存</span></label>
+            <label class="inline-field">自动封禁阈值 <input type="number" min="1" max="10" class="input input-mini" x-model.number="configEdit.blocklist_auto_threshold"/></label>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- 右栏：任务 + 日志 + 结果 -->
+    <div class="col">
+      <!-- 任务列表 -->
+      <div class="card">
+        <div class="card-header">
+          <h3><span class="cfg-ico">≡</span>任务列表</h3>
+          <div class="head-tools">
+            <input x-model="search" type="search" placeholder="搜索邮箱" class="input input-sm search"/>
+          </div>
+        </div>
+
+        <div class="filter-bar">
+          <template x-for="t in filterTabs" :key="t.id">
+            <button type="button" class="ftab" :class="filter===t.id && 'on'" @click="filter=t.id">
+              <span x-text="t.label"></span><span class="fc" x-text="tabCount(t.id)"></span>
+            </button>
+          </template>
+          <div class="flex1"></div>
+          <button type="button" class="btn-mini" :class="paused ? 'blue' : ''" @click="pauseAll()" :disabled="paused">全部暂停</button>
+          <button type="button" class="btn-mini" :class="paused ? 'blue' : ''" @click="startAll()" :disabled="!paused && stats.held===0">全部启动</button>
+          <button type="button" class="btn-mini" @click="bulk('rerun_failed')">重试失败</button>
+          <button type="button" class="btn-mini" @click="confirmBulk('clear_failed')">清失败</button>
+          <button type="button" class="btn-mini" @click="confirmBulk('clear_done')">清已完成</button>
+          <button type="button" class="btn-mini danger" @click="confirmBulk('clear_all')">清全部</button>
+        </div>
+
+        <!-- 内联确认条 -->
+        <div class="confirm-bar" x-show="confirmDialog">
+          <div class="ctxt">
+            <b x-text="confirmDialog?.title||''"></b>
+            <span x-text="(confirmDialog?.detail||'') + ' · ' + (confirmDialog?.countLabel || ('影响 ' + (confirmDialog?.count||0) + ' 个任务'))"></span>
+          </div>
+          <button type="button" class="btn-mini" @click="confirmDialog=null">取消</button>
+          <button type="button" class="btn-mini danger" @click="runConfirm()">确认</button>
+        </div>
+
+        <div class="jobs-wrap">
+          <table class="jobs">
+            <thead>
+              <tr>
+                <th>邮箱</th><th>状态</th><th class="ta-c">QR</th><th>耗时</th><th class="ta-c">尝试</th><th class="ta-r">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template x-for="j in filteredJobs()" :key="j.job_id">
+                <tr @click="selectedJobId=j.job_id" :class="selectedJobId===j.job_id && 'sel'">
+                  <td>
+                    <div class="jemail" :title="j.email" x-text="j.email"></div>
+                    <div x-show="j.last_error && (j.state==='failed'||j.state==='retry_scheduled'||j.state==='stale')"
+                         class="jerr" :title="j.last_error" x-text="j.last_error"></div>
+                  </td>
+                  <td><span class="state-chip" :class="badgeClass(j.state)" x-text="chipLabel(j)"></span></td>
+                  <td class="ta-c">
+                    <button type="button" x-show="j.qr && j.qr.has_image" class="btn-mini blue" @click.stop="openQr(j)">查看</button>
+                    <span x-show="!(j.qr && j.qr.has_image)" class="dim">—</span>
+                  </td>
+                  <td class="mono" x-text="elapsed(j)"></td>
+                  <td class="mono ta-c" x-text="(j.attempt_pipeline||0) + '/' + (config.pipeline_retry_limit||2)"></td>
+                  <td class="ta-r">
+                    <div class="rowacts">
+                      <button type="button" x-show="j.state==='held'" class="btn-mini blue" @click="jobAction(j.job_id,'start')">启动</button>
+                      <button type="button" x-show="isActive(j.state)" class="btn-mini" @click="confirmJob('stop', j)">停止</button>
+                      <button type="button" x-show="isRerunnable(j.state)" class="btn-mini" @click="jobAction(j.job_id,'rerun')">重跑</button>
+                      <button type="button" x-show="canCheck(j.state)" class="btn-mini" @click="jobAction(j.job_id,'check-plan')">Plus</button>
+                      <button type="button" class="btn-mini danger" @click="confirmJob('remove', j)">删</button>
+                    </div>
+                  </td>
+                </tr>
+              </template>
+              <tr x-show="filteredJobs().length===0">
+                <td colspan="6" class="empty-td">
+                  <div class="empty-state">
+                    <div class="big">◈</div>
+                    <div class="t1" style="font-size:13px;font-weight:600;color:var(--muted)">暂无任务</div>
+                    <div class="t2" style="font-size:12px;color:var(--dim);margin-top:4px">在左侧粘贴 AT 列表，点击「立即运行」</div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 任务日志 -->
+      <div class="card">
+        <div class="card-header">
+          <h3><span class="cfg-ico">◈</span>任务日志</h3>
+          <span class="state-chip" x-show="selectedJob()" :class="badgeClass(selectedJob()?.state)" x-text="chipLabel(selectedJob())"></span>
+        </div>
+        <div class="log-sub" x-text="selectedJob() ? selectedJob().email : '选择一个任务查看'"></div>
+        <div class="log-body" x-show="selectedJob()">
+          <ol class="timeline">
+            <template x-for="(t, i) in (selectedJob()?.timeline || [])" :key="i">
+              <li>
+                <span class="dot" :class="logDotClass(t.state)"></span>
+                <div class="tl-head">
+                  <span class="tl-state" x-text="stateLabel(t.state)"></span>
+                  <span class="tl-time" x-text="logTime(t.at)"></span>
+                </div>
+                <div x-show="t.note" class="tl-note" x-text="t.note"></div>
+              </li>
+            </template>
+          </ol>
+          <div x-show="selectedJob()?.last_error" class="err-box">
+            <label>最后错误</label>
+            <div x-text="selectedJob()?.last_error"></div>
+          </div>
+          <div x-show="selectedJob()?.plan_result" class="plan-box">
+            <label>检测 Plus</label>
+            <div x-text="selectedJob()?.plan_result"></div>
+          </div>
+          <div class="attempts">
+            <span x-text="'登录 ' + (selectedJob()?.attempt_login||0)"></span>
+            <span x-text="'流水线 ' + (selectedJob()?.attempt_pipeline||0)"></span>
+          </div>
+        </div>
+        <div class="log-empty" x-show="!selectedJob()">
+          <div class="big">≡</div>
+          <div style="font-size:12px">点击任务行查看详细日志</div>
+        </div>
+
+        <!-- 内联 QR -->
+        <div class="qr-inline" x-show="qrModal">
+          <div class="qr-meta">
+            <div class="qr-email" x-text="qrModal?.email||''"></div>
+            <div x-text="'约 ' + (qrModal?.expiry??'?') + ' 秒后过期'"></div>
+          </div>
+          <img :src="qrModal ? '/api/jobs/'+qrModal.job_id+'/qr.png?t='+Date.now() : ''" alt="支付 QR"/>
+          <div style="display:flex;gap:8px;justify-content:center;margin-top:12px">
+            <a x-show="qrModal?.link" :href="qrModal?.link" target="_blank" rel="noopener" class="btn-mini blue">打开支付链接</a>
+            <button type="button" class="btn-mini" @click="qrModal=null">关闭</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 结果 -->
+      <div class="result-grid">
+        <div class="card">
+          <div class="card-header hl-ok">
+            <h3><span class="dot-live ok"></span>Done</h3>
+            <div class="head-tools">
+              <span class="badge" x-text="doneLines + ' 行'"></span>
+              <button type="button" class="btn-mini" @click="copyResult('done')">复制</button>
+            </div>
+          </div>
+          <pre class="result-pre" x-text="doneContent || '—'"></pre>
+        </div>
+        <div class="card">
+          <div class="card-header hl-pp">
+            <h3><span class="dot-live pp"></span>Plus</h3>
+            <div class="head-tools">
+              <span class="badge" x-text="plusLines + ' 行'"></span>
+              <button type="button" class="btn-mini" @click="copyResult('plus')">复制</button>
+            </div>
+          </div>
+          <pre class="result-pre" x-text="plusContent || '—'"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  function app() {
+    const ACTIVE = new Set(['logging_in','session_ready','submitting_bot','awaiting_qr','qr_ready']);
+    const RERUN = new Set(['failed','stopped','stale','done','plus_confirmed','free_timeout']);
+    const CHECK = new Set(['done','qr_ready']);
+    const BACKOFF = [1000,2000,5000,10000,20000];
+    const STATE_LABELS = {
+      queued:'排队中', held:'已挂起', logging_in:'登录中',
+      session_ready:'会话就绪', submitting_bot:'提交机器人',
+      awaiting_qr:'等待 QR', qr_ready:'QR 就绪', done:'Done',
+      polling_plus:'检测 Plus', plus_confirmed:'Plus 已确认',
+      free_timeout:'仍为 Free', retry_scheduled:'已安排重试',
+      failed:'失败', stopped:'已停止', stale:'僵死',
+    };
+    const LOG_DOT = {
+      done:'bg-emerald-500', plus_confirmed:'bg-emerald-500', free_timeout:'bg-amber-500',
+      failed:'bg-rose-500', stale:'bg-rose-400', stopped:'bg-ink-400',
+      held:'bg-violet-500', retry_scheduled:'bg-amber-500', queued:'bg-ink-300',
+      qr_ready:'bg-indigo-500',
+    };
+    return {
+      jobs: {},
+      config: {},
+      configEdit: {},
+      filter: 'all',
+      search: '',
+      rawText: '',
+      selectedJobId: null,
+      account: {},
+      accountLoading: false,
+      showConfig: false,
+      sseOk: false,
+      sseRetries: 0,
+      _sse: null,
+      _sseTimer: null,
+      _sseGen: 0,
+      _lastSeq: 0,
+      _loadEpoch: 0,
+      _pollTimer: null,
+      DRAFT_KEY: 'plusqr.accountsDraft',
+      toasts: [],
+      confirmDialog: null,
+      qrModal: null,
+      plusContent: '',
+      doneContent: '',
+      submitMsg: '',
+      submitting: false,
+      testRustMsg: '',
+      testingRust: false,
+      showRustToken: false,
+      showTgToken: false,
+      testTgMsg: '',
+      skipCacheBatch: false,
+      paused: false,
+      _tick: 0,
+      proxyPool: {total:0, used:0, remaining:0},
+      proxyDirty: false,
+      savingProxy: false,
+      scanDirty: false,
+      savingScan: false,
+      checkingScan: false,
+      scanQuota: null,
+      stats2: {done_total:0, fail_total:0, done_24h:0, fail_24h:0, success_rate:0},
+      filterTabs: [
+        {id:'all', label:'全部'},
+        {id:'active', label:'运行中'},
+        {id:'done', label:'Done'},
+        {id:'plus', label:'Plus'},
+        {id:'error', label:'错误'},
+        {id:'held', label:'挂起'},
+      ],
+      get stats() {
+        const s = {total:0,active:0,done:0,plus:0,failed:0,held:0,stopped:0,stale:0};
+        for (const j of Object.values(this.jobs)) {
+          s.total++;
+          if (ACTIVE.has(j.state)) s.active++;
+          if (j.state==='done') s.done++;
+          if (j.plan_result==='plus' || j.state==='plus_confirmed') s.plus++;
+          if (j.state==='failed') s.failed++;
+          if (j.state==='held') s.held++;
+          if (j.state==='stopped') s.stopped++;
+          if (j.state==='stale') s.stale++;
+        }
+        return s;
+      },
+      get preview() {
+        const lines = (this.rawText||'').split(/\n/);
+        let valid=0, invalid=0;
+        const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        for (const ln of lines) {
+          const t = ln.trim();
+          if (!t) continue;
+          let email = '', token = t;
+          const bar = t.indexOf('|');
+          if (bar !== -1) {
+            email = t.slice(0, bar).trim();
+            token = t.slice(bar + 1).trim();
+          }
+          const tokenOk = token.split('.').length === 3 && token.length > 40;
+          const emailOk = email ? emailRe.test(email) : tokenOk;
+          if (tokenOk && emailOk) valid++; else invalid++;
+        }
+        return {valid, invalid};
+      },
+      get plusLines() {
+        return (this.plusContent||'').split('\n').filter(l=>l.trim()).length;
+      },
+      get doneLines() {
+        return (this.doneContent||'').split('\n').filter(l=>l.trim()).length;
+      },
+      init() {
+        this.restoreDraft();
+        this.loadConfig();
+        this.loadJobs();
+        this.connectSSE();
+        this.refreshResults();
+        this.loadAccount();
+        this.loadPauseStatus();
+        this.loadMyProxies();
+        this.loadStats();
+        this.$watch('rawText', (v) => { this.persistDraft(v); });
+        window.addEventListener('beforeunload', () => this.persistDraft(this.rawText));
+        // Catch-up khi tab ẩn/hiện hoặc mạng offline→online
+        document.addEventListener('visibilitychange', () => {
+          if (!document.hidden) this.forceSync('visibility');
+        });
+        window.addEventListener('focus', () => this.forceSync('focus'));
+        window.addEventListener('online', () => {
+          this.connectSSE();
+          this.forceSync('online');
+        });
+        // Poll fallback: SSE miss vẫn tự chữa — nhanh khi đang chạy / SSE đứt
+        this._pollTimer = setInterval(() => this.pollSync(), 2000);
+        setInterval(() => { this.refreshResults(); }, 15000);
+        setInterval(() => { this.loadStats(); }, 20000);
+        setInterval(() => { this.loadAccount(); }, 60000);
+        setInterval(() => { this._tick++; }, 1000);
+      },
+      hasLiveWork() {
+        for (const j of Object.values(this.jobs)) {
+          if (ACTIVE.has(j.state) || j.state === 'queued' || j.state === 'retry_scheduled') return true;
+        }
+        return false;
+      },
+      chipLabel(j) {
+        const base = (j && (j.state_label || j.state)) || '';
+        if (j && j.state === 'queued' && j.queue_position > 0) {
+          return base + ' · 第' + j.queue_position + '位';
+        }
+        return base;
+      },
+      async forceSync(_why) {
+        await this.loadJobs();
+        this.loadPauseStatus();
+      },
+      async pollSync() {
+        // Luôn poll khi SSE down; khi OK thì poll nếu còn job đang chạy (an toàn)
+        if (!this.sseOk || this.hasLiveWork()) {
+          await this.loadJobs();
+        }
+      },
+      restoreDraft() {
+        try {
+          const v = localStorage.getItem(this.DRAFT_KEY);
+          if (typeof v === 'string') this.rawText = v;
+        } catch(_){}
+      },
+      persistDraft(v) {
+        try { localStorage.setItem(this.DRAFT_KEY, v ?? ''); } catch(_){}
+      },
+      confirmClearInput() {
+        const n = (this.rawText||'').split(/\n/).filter(l=>l.trim()).length;
+        this.confirmDialog = {
+          title: '清空输入',
+          detail: '清空「帐号列表」输入框中的全部文本。此操作无法撤销。',
+          count: n,
+          countLabel: '行数: ' + n,
+          fn: () => this.clearInput(),
+        };
+      },
+      clearInput() {
+        this.rawText = '';
+        this.persistDraft('');
+        this.submitMsg = '';
+        this.toast('输入已清空');
+      },
+      replaceJobs(list) {
+        const next = {};
+        for (const j of (list || [])) {
+          if (j && j.job_id) next[j.job_id] = j;
+        }
+        this.jobs = next;
+      },
+      noteSeq(seq) {
+        const n = Number(seq);
+        if (!Number.isFinite(n) || n <= 0) return true;
+        if (n < this._lastSeq) return false; // stale
+        this._lastSeq = n;
+        return true;
+      },
+      seqGap(seq) {
+        const n = Number(seq);
+        if (!Number.isFinite(n) || n <= 0 || !this._lastSeq) return false;
+        return n > this._lastSeq + 1;
+      },
+      async loadJobs() {
+        const epoch = ++this._loadEpoch;
+        try {
+          const r = await fetch('/api/jobs', { cache: 'no-store' });
+          if (!r.ok || epoch !== this._loadEpoch) return;
+          const seq = parseInt(r.headers.get('X-Jobs-Seq') || '0', 10);
+          // Không ghi đè state mới hơn từ SSE
+          if (seq && this._lastSeq && seq < this._lastSeq) return;
+          const list = await r.json();
+          if (epoch !== this._loadEpoch) return;
+          this.replaceJobs(list);
+          if (seq) this._lastSeq = Math.max(this._lastSeq, seq);
+        } catch(_){}
+      },
+      async loadPauseStatus() {
+        try {
+          const r = await fetch('/api/jobs/pause-status');
+          const d = await r.json();
+          this.paused = !!d.paused;
+        } catch(_){}
+      },
+      async pauseAll() {
+        const r = await fetch('/api/jobs/pause', {method:'POST'});
+        const d = await r.json().catch(()=>({}));
+        if (!r.ok) { this.toast('错误: '+(d.error_code||r.status)); return; }
+        this.paused = true;
+        await this.loadJobs();
+        this.toast('已全部暂停 · 挂起 '+(d.held||0)+' 个待处理任务');
+      },
+      async startAll() {
+        // 恢复调度 + 启动所有挂起任务
+        await fetch('/api/jobs/resume', {method:'POST'}).catch(()=>{});
+        this.paused = false;
+        let started = 0;
+        try {
+          const r = await fetch('/api/jobs/start-all-held', {method:'POST'});
+          const d = await r.json().catch(()=>({}));
+          started = d.started || 0;
+        } catch(_) {}
+        await this.loadJobs();
+        this.toast('已全部启动 · 恢复 ' + started + ' 个挂起任务');
+      },
+      async togglePause() {
+        const url = this.paused ? '/api/jobs/resume' : '/api/jobs/pause';
+        const r = await fetch(url, {method:'POST'});
+        const d = await r.json().catch(()=>({}));
+        if (!r.ok) { this.toast('错误: '+(d.error_code||r.status)); return; }
+        this.paused = !!d.paused;
+        await this.loadJobs();
+        if (this.paused) this.toast('已暂停 · 挂起 '+(d.held||0)+' 个待处理任务');
+        else this.toast('已继续 · 运行 '+(d.started||0)+' 个任务');
+      },
+      async loadAccount() {
+        if (this.accountLoading) return;
+        this.accountLoading = true;
+        try {
+          const r = await fetch('/api/account');
+          this.account = await r.json();
+        } catch(_) {
+          this.account = {ok:false, error:'network'};
+        } finally {
+          this.accountLoading = false;
+        }
+      },
+      async refreshProxyPool() {
+        try {
+          const r = await fetch('/api/proxy-pool');
+          this.proxyPool = await r.json();
+        } catch(_) {}
+      },
+      async loadMyProxies() {
+        // 从浏览器本地读取自己的代理并同步到后端（按 session 隔离）
+        try {
+          const saved = localStorage.getItem('upi.proxy_list') || '';
+          if (saved) {
+            this.configEdit.proxy_list = saved;
+            await fetch('/api/proxy-pool', {
+              method:'POST', headers:{'Content-Type':'application/json'},
+              body: JSON.stringify({ proxy_list: saved })
+            }).catch(()=>{});
+          }
+          await this.refreshProxyPool();
+        } catch(_) {}
+      },
+      async loadStats() {
+        try {
+          const r = await fetch('/api/stats');
+          this.stats2 = await r.json();
+        } catch(_) {}
+      },
+      async saveProxy() {
+        if (this.savingProxy) return;
+        this.savingProxy = true;
+        try {
+          // 代理按访客 session 隔离存储
+          const r = await fetch('/api/proxy-pool', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ proxy_list: this.configEdit.proxy_list || '' })
+          });
+          const d = await r.json().catch(()=>({}));
+          if (!r.ok || d.ok === false) { this.toast('代理保存失败: ' + (d.error||r.status)); return; }
+          try { localStorage.setItem('upi.proxy_list', this.configEdit.proxy_list || ''); } catch(_) {}
+          this.proxyDirty = false;
+          await this.refreshProxyPool();
+          this.toast('代理链已保存（仅本机） · 共 ' + (d.total||0) + ' 条');
+        } finally {
+          this.savingProxy = false;
+        }
+      },
+      async saveScanSite() {
+        if (this.savingScan) return;
+        this.savingScan = true;
+        try {
+          const r = await fetch('/api/settings/bulk', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({
+              scan_site_url: (this.configEdit.scan_site_url || 'https://masi.cc.cd').trim(),
+              scan_site_cdk: (this.configEdit.scan_site_cdk || '').trim(),
+              scan_site_enabled: !!this.configEdit.scan_site_enabled,
+              scan_site_require_workers: !!this.configEdit.scan_site_require_workers,
+            })
+          });
+          const d = await r.json().catch(()=>({}));
+          if (!r.ok) { this.toast('扫码站点保存失败: ' + (d.message||r.status)); return; }
+          this.config = d;
+          this.scanDirty = false;
+          this.toast('扫码站点已保存');
+        } finally {
+          this.savingScan = false;
+        }
+      },
+      async checkScanCdk() {
+        if (this.checkingScan) return;
+        this.checkingScan = true;
+        try {
+          const r = await fetch('/api/scan-site/quota', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ cdk: (this.configEdit.scan_site_cdk||'').trim() })
+          });
+          const d = await r.json().catch(()=>({}));
+          if (d.ok && d.ticket) {
+            this.scanQuota = d.ticket;
+            this.toast('可用额度: ' + (d.ticket.available_uses ?? '?'));
+          } else {
+            this.toast('查询失败: ' + (d.error||d.message||'未知'));
+          }
+        } finally {
+          this.checkingScan = false;
+        }
+      },
+      tabCount(id) {
+        const s = this.stats;
+        if (id==='all') return s.total;
+        if (id==='active') return s.active;
+        if (id==='done') return s.done;
+        if (id==='plus') return s.plus;
+        if (id==='error') return s.failed + s.stale;
+        if (id==='held') return s.held;
+        return 0;
+      },
+      async setFlow(mode) {
+        this.configEdit.flow_mode = mode;
+        this.config.flow_mode = mode;
+        try {
+          await fetch('/api/settings/flow_mode', {
+            method:'PUT', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({value: mode})
+          });
+        } catch(_){}
+      },
+      async loadConfig() {
+        const r = await fetch('/api/settings');
+        this.config = await r.json();
+        const myProxy = this.configEdit.proxy_list || localStorage.getItem('upi.proxy_list') || '';
+        this.configEdit = {...this.config};
+        // 代理列表按访客隔离，不用全局值覆盖
+        this.configEdit.proxy_list = myProxy;
+        this.refreshProxyPool();
+      },
+      async saveConfig() {
+        const body = {...this.configEdit};
+        delete body.proxy_list;  // 代理按访客隔离，不走全局设置
+        const myProxy = this.configEdit.proxy_list || '';
+        const r = await fetch('/api/settings/bulk', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify(body)
+        });
+        if (!r.ok) {
+          const e = await r.json().catch(()=>({}));
+          this.toast('保存失败: ' + (e.message||r.status));
+          return;
+        }
+        const saved = await r.json();
+        this.config = saved;
+        this.configEdit = {...saved};
+        this.configEdit.proxy_list = myProxy;
+        this.toast('设置已保存');
+        this.refreshProxyPool();
+      },
+      async testRust(opts = {}) {
+        // 已废弃：外部 Rust UPI Bot 不再使用（改用本地精简核心）
+        return;
+      },
+      async testTelegram() {
+        // 已废弃：Telegram 通知不再使用
+        return;
+      },
+      connectSSE() {
+        if (this._sseTimer) { clearTimeout(this._sseTimer); this._sseTimer = null; }
+        if (this._sse) { try { this._sse.close(); } catch(_){} this._sse = null; }
+        const gen = ++this._sseGen;
+        const es = new EventSource('/api/jobs/stream');
+        this._sse = es;
+        const parse = (raw) => { try { return JSON.parse(raw); } catch(_){ return null; } };
+        const onEvt = (e) => {
+          if (gen !== this._sseGen) return;
+          this.applyUpdate(parse(e.data));
+        };
+        es.addEventListener('snapshot', onEvt);
+        es.addEventListener('job', onEvt);
+        es.addEventListener('bulk', onEvt);
+        es.addEventListener('resync', (e) => {
+          if (gen !== this._sseGen) return;
+          const d = parse(e.data);
+          if (d && d.seq) this._lastSeq = Math.max(this._lastSeq, Number(d.seq) || 0);
+          this.loadJobs();
+        });
+        es.addEventListener('ping', (e) => {
+          if (gen !== this._sseGen) return;
+          this.sseOk = true;
+          const d = parse(e.data);
+          if (d && this.seqGap(d.seq)) {
+            this._lastSeq = Number(d.seq) || this._lastSeq;
+            this.loadJobs();
+          } else if (d && d.seq) {
+            this._lastSeq = Math.max(this._lastSeq, Number(d.seq) || 0);
+          }
+        });
+        es.onmessage = onEvt;
+        es.onopen = () => {
+          if (gen !== this._sseGen) return;
+          this.sseOk = true;
+          this.sseRetries = 0;
+          // Reconnect gap: HTTP sync song song snapshot
+          this.loadJobs();
+        };
+        es.onerror = () => {
+          if (gen !== this._sseGen) return;
+          this.sseOk = false;
+          // Fill gap ngay khi đứt — không chờ reconnect xong
+          this.loadJobs();
+          try { es.close(); } catch(_){}
+          if (this._sse === es) this._sse = null;
+          const wait = BACKOFF[Math.min(this.sseRetries, BACKOFF.length - 1)];
+          this.sseRetries++;
+          this._sseTimer = setTimeout(() => {
+            if (gen === this._sseGen) this.connectSSE();
+          }, wait);
+        };
+      },
+      applyUpdate(data) {
+        if (!data) return;
+        if (data.type === 'ping') {
+          if (this.seqGap(data.seq)) this.loadJobs();
+          else this.noteSeq(data.seq);
+          return;
+        }
+        if (data.type === 'resync') {
+          if (data.seq) this._lastSeq = Math.max(this._lastSeq, Number(data.seq) || 0);
+          this.loadJobs();
+          return;
+        }
+        // Gap → full resync thay vì apply lệch
+        if (this.seqGap(data.seq)) {
+          this._lastSeq = Math.max(this._lastSeq, Number(data.seq) || 0);
+          this.loadJobs();
+          return;
+        }
+        if (data.seq != null && Number(data.seq) < this._lastSeq) return;
+        if (data.seq != null) this.noteSeq(data.seq);
+
+        if (data.type === 'deleted' && data.job_id) {
+          delete this.jobs[data.job_id];
+          if (this.selectedJobId === data.job_id) this.selectedJobId = null;
+          this.jobs = {...this.jobs};
+          return;
+        }
+        if (data.type === 'snapshot' && Array.isArray(data.jobs)) {
+          this.replaceJobs(data.jobs);
+          return;
+        }
+        if (data.type === 'bulk') {
+          if (data.action === 'pause' || data.action === 'resume') {
+            this.paused = !!data.paused;
+          }
+          if (Array.isArray(data.jobs)) this.replaceJobs(data.jobs);
+          else this.loadJobs();
+          if (data.action === 'clear' || data.action === 'rerun_failed') {
+            this.refreshResults();
+          }
+          return;
+        }
+        if (data.job_id && data.state) {
+          this.jobs[data.job_id] = data;
+          this.jobs = {...this.jobs};
+          if (data.state === 'done' || data.state === 'plus_confirmed') {
+            this.refreshResults();
+            this.loadAccount();
+          }
+        }
+      },
+      filteredJobs() {
+        void this._tick;
+        const q = (this.search||'').toLowerCase();
+        return Object.values(this.jobs).filter(j => {
+          if (q && !(j.email||'').toLowerCase().includes(q)) return false;
+          if (this.filter==='all') return true;
+          if (this.filter==='active') return ACTIVE.has(j.state);
+          if (this.filter==='done') return j.state==='done';
+          if (this.filter==='plus') return j.plan_result==='plus' || j.state==='plus_confirmed';
+          if (this.filter==='error') return j.state==='failed' || j.state==='stale';
+          if (this.filter==='held') return j.state==='held';
+          return true;
+        }).sort((a,b)=>(b.created_at||0)-(a.created_at||0));
+      },
+      isActive(s){ return ACTIVE.has(s); },
+      isRerunnable(s){ return RERUN.has(s); },
+      canCheck(s){ return CHECK.has(s); },
+      selectedJob(){ return this.selectedJobId ? this.jobs[this.selectedJobId] : null; },
+      stateLabel(s){ return STATE_LABELS[s] || s; },
+      logDotClass(s){ return LOG_DOT[s] || 'bg-sky-500'; },
+      logTime(at){
+        if (!at) return '';
+        const d = new Date(at*1000);
+        return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0');
+      },
+      badgeClass(s) {
+        const m = {
+          done: 'bg-emerald-100 text-emerald-800 ring-1 ring-inset ring-emerald-400 font-semibold',
+          plus_confirmed: 'bg-emerald-100 text-emerald-800 ring-1 ring-inset ring-emerald-300',
+          free_timeout: 'bg-amber-100 text-amber-800 ring-1 ring-inset ring-amber-300',
+          failed: 'bg-rose-100 text-rose-800 ring-1 ring-inset ring-rose-300',
+          stale: 'bg-rose-100 text-rose-700 ring-1 ring-inset ring-rose-300',
+          held: 'bg-violet-100 text-violet-800 ring-1 ring-inset ring-violet-300',
+          stopped: 'bg-ink-200 text-ink-700 ring-1 ring-inset ring-ink-300',
+          qr_ready: 'chip-live bg-indigo-100 text-indigo-800 ring-1 ring-inset ring-indigo-300',
+          retry_scheduled: 'bg-amber-100 text-amber-800 ring-1 ring-inset ring-amber-300',
+          queued: 'bg-ink-200 text-ink-700 ring-1 ring-inset ring-ink-300',
+        };
+        return m[s] || 'chip-live bg-sky-100 text-sky-800 ring-1 ring-inset ring-sky-300';
+      },
+      elapsed(j) {
+        void this._tick;
+        if (!j.started_at) return '—';
+        const end = j.ended_at || (Date.now()/1000);
+        const s = Math.max(0, Math.floor(end - j.started_at));
+        const m = Math.floor(s/60); const r = s%60;
+        return String(m).padStart(2,'0')+':'+String(r).padStart(2,'0');
+      },
+      async submit(mode) {
+        if (this.submitting) return;
+        this.submitting = true;
+        try {
+          const r = await fetch('/api/jobs/submit', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({
+              raw_text: this.rawText,
+              dispatch_mode: mode,
+              skip_session_cache: this.skipCacheBatch || undefined,
+            })
+          });
+          const d = await r.json().catch(()=>({}));
+          if (!r.ok) {
+            this.toast('提交失败: ' + (d.error_code || r.status));
+            return;
+          }
+          const dup = d.duplicate_count || (d.skipped||[]).filter(s=>s.reason==='duplicate_job').length;
+          this.submitMsg = `已创建 ${d.created?.length||d.valid_count||0}` +
+            ` · 错误 ${d.error_count||0}` +
+            (dup ? ` · 重复 ${dup}` : '') +
+            ((d.skipped?.length && !dup) ? ` · 已屏蔽 ${d.skipped.length}` : '') +
+            (dup && d.skipped?.length > dup ? ` · 已屏蔽 ${d.skipped.length - dup}` : '');
+          this.toast(dup
+            ? `已创建 ${d.created?.length||0} · 跳过 ${dup} 个重复邮箱（1 邮箱 = 1 任务）`
+            : this.submitMsg);
+          if (d.created) {
+            for (const j of d.created) this.jobs[j.job_id] = j;
+            this.jobs = {...this.jobs};
+          }
+          await this.loadJobs();
+          if (mode === 'immediate') this.filter = 'all';
+          else if (mode === 'hold') this.filter = 'held';
+        } finally {
+          this.submitting = false;
+        }
+      },
+      async jobAction(id, action) {
+        const r = await fetch(`/api/jobs/${id}/${action}`, {method:'POST'});
+        const d = await r.json().catch(()=>({}));
+        if (!r.ok) {
+          this.toast('错误: ' + (d.error_code||r.status));
+          return;
+        }
+        if (d.job_id && d.state) {
+          this.applyUpdate(d);
+        } else if (action === 'check-plan') {
+          const cur = this.jobs[id];
+          if (cur) {
+            this.jobs[id] = {
+              ...cur,
+              plan_result: d.plan_result || d.result,
+              state: d.state || cur.state,
+            };
+            this.jobs = {...this.jobs};
+            if (d.result === 'plus') this.refreshResults();
+          }
+        }
+        await this.loadJobs();
+        if (action==='rerun') {
+          this.filter = 'all';
+          this.toast('重跑 → ' + (d.new_job_id||'').slice(0,8));
+        } else if (action==='check-plan') this.toast('Plus: ' + d.result);
+        else this.toast('OK · ' + action);
+      },
+      async bulk(name) {
+        let url = '', method='POST';
+        if (name==='stop_all') url='/api/jobs/stop-all';
+        if (name==='start_all_held') url='/api/jobs/start-all-held';
+        if (name==='rerun_failed') url='/api/jobs/rerun-failed';
+        if (name==='clear_failed') { url='/api/jobs/clear?filter=failed'; method='DELETE'; }
+        if (name==='clear_done') { url='/api/jobs/clear?filter=done'; method='DELETE'; }
+        if (name==='clear_all') { url='/api/jobs/clear?filter=all&confirm=true'; method='DELETE'; }
+        const r = await fetch(url, {method, cache:'no-store'});
+        const d = await r.json().catch(()=>({}));
+        if (!r.ok) { this.toast('错误: '+(d.error_code||r.status)); return; }
+        // Sync ngay từ API — không phụ thuộc SSE / F5
+        await this.loadJobs();
+        if (name.startsWith('clear')) {
+          const outs = d.outputs || {};
+          const outNote = name==='clear_all'
+            ? ` · 输出 done ${outs.done||0}/plus ${outs.plus||0}`
+            : '';
+          this.toast('已清除 ' + (d.cleared||0) + ' 个任务' + outNote);
+          await this.refreshResults();
+          this.filter = 'all';
+        } else if (name==='stop_all') {
+          this.toast('已停止 '+(d.stopped||0)+' · 跳过 '+(d.skipped||0));
+        } else if (name==='start_all_held') {
+          this.filter = 'all';
+          this.toast('已启动 '+(d.started||0)+' 个挂起任务');
+        } else if (name==='rerun_failed') {
+          this.filter = 'all';
+          this.toast('重试 '+(Array.isArray(d)?d.length:0)+' 个失败任务');
+        }
+      },
+      confirmBulk(name) {
+        const map = {
+          stop_all: {title:'全部停止', detail:'停止所有运行中或待处理的任务。', count: this.stats.active + this.stats.held, fn:()=>this.bulk('stop_all')},
+          clear_failed: {title:'清除失败任务', detail:'仅清除状态为 failed 的任务。', count: Object.values(this.jobs).filter(j=>j.state==='failed').length, fn:()=>this.bulk('clear_failed')},
+          clear_done: {title:'清除已完成任务', detail:'清除 done / stopped 状态的任务。', count: Object.values(this.jobs).filter(j=>['done','plus_confirmed','free_timeout','stopped'].includes(j.state)).length, fn:()=>this.bulk('clear_done')},
+          clear_all: {title:'清除全部', detail:'删除所有任务（含运行中），并清空 Done + Plus 输出文件。', count: this.stats.total, fn:()=>this.bulk('clear_all')},
+        };
+        this.confirmDialog = map[name];
+      },
+      confirmJob(action, j) {
+        if (action==='stop') {
+          this.confirmDialog = {title:'停止任务', detail:j.email, count:1, fn:()=>this.jobAction(j.job_id,'stop')};
+        } else if (action==='remove') {
+          this.confirmDialog = {title:'删除任务', detail:j.email, count:1, fn: async ()=>{
+            const r = await fetch('/api/jobs/'+j.job_id, {method:'DELETE'});
+            if (r.ok) { delete this.jobs[j.job_id]; this.jobs={...this.jobs}; this.toast('已删除'); }
+          }};
+        }
+      },
+      async runConfirm() {
+        const fn = this.confirmDialog?.fn;
+        this.confirmDialog = null;
+        if (fn) await fn();
+      },
+      openQr(j) {
+        this.qrModal = {job_id:j.job_id, email:j.email, expiry:j.qr?.expiry_seconds, link:j.qr?.payment_link};
+      },
+      async refreshResults() {
+        try {
+          const [d,p] = await Promise.all([
+            fetch('/api/results/done').then(r=>r.json()),
+            fetch('/api/results/plus').then(r=>r.json()),
+          ]);
+          this.doneContent = d.content||'';
+          this.plusContent = p.content||'';
+        } catch(_){}
+      },
+      async copyResult(kind) {
+        const t = kind==='done' ? this.doneContent : this.plusContent;
+        try { await navigator.clipboard.writeText(t||''); this.toast('已复制 '+kind); } catch(e){ this.toast('复制失败'); }
+      },
+      toast(msg) {
+        const id = Date.now()+Math.random();
+        this.toasts.push({id, msg});
+        setTimeout(()=>{ this.toasts = this.toasts.filter(t=>t.id!==id); }, 3500);
+      },
+    }
+  }
+  </script>
+</body>
+</html>
